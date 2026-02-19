@@ -1,0 +1,8 @@
+{
+  "name": "ElectricAI - Field Service Pro",
+  "description": "A comprehensive mobile-first field service application for electricians featuring AI-powered voice note analysis, job management, time tracking, and automated invoicing.",
+  "requestFramePermissions": [
+    "camera",
+    "microphone"
+  ]
+}
