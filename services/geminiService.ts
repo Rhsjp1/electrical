@@ -35,9 +35,25 @@ export const analyzeJobDescription = async (transcript: string): Promise<AIAnaly
             type: Type.ARRAY,
             items: { type: Type.STRING },
             description: "Prioritized troubleshooting or repair steps that comply with NC safety regulations and the NEC."
+          },
+          parts: {
+            type: Type.ARRAY,
+            items: {
+              type: Type.OBJECT,
+              properties: {
+                name: { type: Type.STRING },
+                quantity: { type: Type.STRING }
+              },
+              required: ["name", "quantity"]
+            },
+            description: "List of electrical parts or materials required for the fix."
+          },
+          estimatedCost: {
+            type: Type.STRING,
+            description: "Rough estimate of material costs in NC market (e.g. '$50 - $100')."
           }
         },
-        required: ["summary", "causes", "steps"]
+        required: ["summary", "causes", "steps", "parts", "estimatedCost"]
       }
     }
   });

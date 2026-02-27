@@ -50,6 +50,7 @@ const ActiveJobPage: React.FC<ActiveJobPageProps> = ({ job, onUpdateJob, onToggl
   const [activeTab, setActiveTab] = useState<'voice' | 'photos' | 'parts' | 'time' | 'notes'>('voice');
   const [isRecording, setIsRecording] = useState(false);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
+  const [isHandsFree, setIsHandsFree] = useState(false);
   const [speechResult, setSpeechResult] = useState('');
   const [manualText, setManualText] = useState('');
   
@@ -299,88 +300,131 @@ const ActiveJobPage: React.FC<ActiveJobPageProps> = ({ job, onUpdateJob, onToggl
             
             {/* Unified Capture Hub */}
             <div className="space-y-4">
-              <div className="flex items-center gap-2 px-2">
-                <Zap className="text-indigo-500" size={14} />
-                <h4 className="font-black text-[10px] text-slate-400 dark:text-slate-500 uppercase tracking-[0.2em]">Diagnostic Command Center</h4>
+              <div className="flex items-center justify-between px-2">
+                <div className="flex items-center gap-2">
+                  <Zap className="text-indigo-500" size={14} />
+                  <h4 className="font-black text-[10px] text-slate-400 dark:text-slate-500 uppercase tracking-[0.2em]">Diagnostic Command Center</h4>
+                </div>
+                <button 
+                  onClick={() => setIsHandsFree(!isHandsFree)}
+                  className={`flex items-center gap-2 px-3 py-1.5 rounded-full text-[9px] font-black uppercase tracking-widest transition-all ${
+                    isHandsFree 
+                      ? 'bg-yellow-400 text-black shadow-lg shadow-yellow-400/20' 
+                      : 'bg-slate-100 dark:bg-slate-800 text-slate-500'
+                  }`}
+                >
+                  <Zap size={10} fill={isHandsFree ? "black" : "none"} />
+                  {isHandsFree ? 'Hands-Free Active' : 'Go Hands-Free'}
+                </button>
               </div>
               
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+              <div className={`grid grid-cols-1 ${isHandsFree ? '' : 'lg:grid-cols-2'} gap-4 transition-all duration-500`}>
                 {/* Verbal Mode */}
-                <div className="flex flex-col items-center justify-center py-10 bg-white dark:bg-slate-900 rounded-[3rem] border border-slate-200 dark:border-slate-800 shadow-sm relative overflow-hidden group">
+                <div className={`flex flex-col items-center justify-center py-10 rounded-[3rem] border transition-all duration-500 relative overflow-hidden group ${
+                  isHandsFree 
+                    ? 'bg-zinc-900 border-yellow-400/50 shadow-2xl shadow-yellow-400/10' 
+                    : 'bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 shadow-sm'
+                }`}>
+                  {isHandsFree && (
+                    <div className="absolute top-6 left-6 flex items-center gap-2">
+                      <div className={`w-2 h-2 rounded-full ${isRecording ? 'bg-red-500 animate-ping' : 'bg-yellow-400'}`} />
+                      <span className="text-[9px] font-black text-yellow-400 uppercase tracking-widest">
+                        {isRecording ? 'Capturing Report...' : 'System: Standby'}
+                      </span>
+                    </div>
+                  )}
                   <div className="absolute inset-0 bg-indigo-500/5 dark:bg-indigo-500/10 opacity-0 group-hover:opacity-100 transition-opacity" />
                   <div className="flex items-center gap-2 mb-6 px-4">
-                    <Mic size={14} className="text-rose-500" />
-                    <h4 className="font-black text-[9px] text-slate-400 uppercase tracking-widest">Verbal Capture</h4>
+                    <Mic size={14} className={isHandsFree ? "text-yellow-400" : "text-rose-500"} />
+                    <h4 className={`font-black text-[9px] uppercase tracking-widest ${isHandsFree ? 'text-zinc-500' : 'text-slate-400'}`}>
+                      {isHandsFree ? 'SparkySolve Voice' : 'Verbal Capture'}
+                    </h4>
                   </div>
                   <button
                     onClick={isRecording ? handleStopRecording : handleStartRecording}
                     disabled={isAnalyzing}
-                    className={`w-20 h-20 rounded-full flex items-center justify-center shadow-2xl transition-all relative z-10 ${
+                    className={`w-24 h-24 rounded-full flex items-center justify-center shadow-2xl transition-all relative z-10 ${
                       isRecording 
-                        ? 'bg-rose-500 animate-pulse scale-110 shadow-rose-500/40' 
+                        ? 'bg-red-600 animate-pulse scale-110 shadow-red-600/40' 
                         : isAnalyzing 
                           ? 'bg-slate-400' 
-                          : 'bg-indigo-600 hover:bg-indigo-700 shadow-indigo-500/30'
-                    } text-white`}
+                          : isHandsFree
+                            ? 'bg-yellow-400 text-black hover:bg-yellow-300 shadow-yellow-400/20'
+                            : 'bg-indigo-600 hover:bg-indigo-700 shadow-indigo-500/30'
+                    } ${!isRecording && !isAnalyzing && !isHandsFree ? 'text-white' : ''}`}
                   >
                     {isAnalyzing ? <Loader2 className="animate-spin" size={32} /> : (isRecording ? <Square size={32} fill="currentColor" /> : <Mic size={32} />)}
                   </button>
                   <div className="mt-6 text-center px-6">
-                    <p className="font-black text-slate-400 uppercase tracking-tighter text-[10px]">Tap to dictate</p>
+                    <p className={`font-black uppercase tracking-tighter text-[10px] ${isHandsFree ? 'text-yellow-400/70' : 'text-slate-400'}`}>
+                      {isRecording ? 'Listening to problem...' : 'Tap mic to start voice report'}
+                    </p>
                   </div>
                   {isRecording && (
-                    <div className="mt-4 p-3 bg-rose-50 dark:bg-rose-950/30 rounded-xl max-w-xs mx-auto border border-rose-100 dark:border-rose-900/50">
-                      <p className="text-xs italic text-rose-600 dark:text-rose-400 text-center">"{speechResult || '...'}"</p>
+                    <div className={`mt-4 p-3 rounded-xl max-w-xs mx-auto border ${
+                      isHandsFree 
+                        ? 'bg-zinc-800 border-yellow-400/20 text-yellow-400' 
+                        : 'bg-rose-50 dark:bg-rose-950/30 border-rose-100 dark:border-rose-900/50 text-rose-600 dark:text-rose-400'
+                    }`}>
+                      <p className="text-xs italic text-center">"{speechResult || '...'}"</p>
                     </div>
                   )}
                 </div>
 
-                {/* Keyboard Mode */}
-                <div className="bg-white dark:bg-slate-900 rounded-[3rem] border border-slate-200 dark:border-slate-800 p-6 shadow-sm flex flex-col gap-4">
-                  <div className="flex items-center justify-between px-2">
-                    <div className="flex items-center gap-2">
-                      <Keyboard size={14} className="text-indigo-500" />
-                      <h4 className="font-black text-[9px] text-slate-400 uppercase tracking-widest">Manual Entry</h4>
-                    </div>
-                    {manualText && (
-                      <button onClick={() => setManualText('')} className="text-slate-400 hover:text-rose-500 transition-colors">
-                        <Eraser size={14} />
+                {!isHandsFree && (
+                  <>
+                    {/* Keyboard Mode */}
+                    <div className="bg-white dark:bg-slate-900 rounded-[3rem] border border-slate-200 dark:border-slate-800 p-6 shadow-sm flex flex-col gap-4">
+                      <div className="flex items-center justify-between px-2">
+                        <div className="flex items-center gap-2">
+                          <Keyboard size={14} className="text-indigo-500" />
+                          <h4 className="font-black text-[9px] text-slate-400 uppercase tracking-widest">Manual Entry</h4>
+                        </div>
+                        {manualText && (
+                          <button onClick={() => setManualText('')} className="text-slate-400 hover:text-rose-500 transition-colors">
+                            <Eraser size={14} />
+                          </button>
+                        )}
+                      </div>
+                      <div className="relative flex-1 min-h-[140px]">
+                        <textarea 
+                          value={manualText}
+                          onChange={(e) => setManualText(e.target.value)}
+                          onKeyDown={handleKeyDown}
+                          disabled={isAnalyzing}
+                          placeholder="Input technical data: e.g. 'Main breaker tripping, 240V present, insulation smell near panel...'"
+                          className="w-full h-full bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-2xl p-4 text-xs font-bold text-slate-700 dark:text-slate-200 outline-none focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 transition-all resize-none leading-relaxed"
+                        />
+                      </div>
+                      <button 
+                        onClick={handleManualSubmit}
+                        disabled={isAnalyzing || !manualText.trim()}
+                        className={`w-full py-4 rounded-xl transition-all shadow-xl flex items-center justify-center gap-2 ${
+                          manualText.trim() && !isAnalyzing 
+                            ? 'bg-indigo-600 text-white shadow-indigo-500/30 active:scale-95' 
+                            : 'bg-slate-200 dark:bg-slate-800 text-slate-400 cursor-not-allowed'
+                        }`}
+                      >
+                        {isAnalyzing ? <Loader2 className="animate-spin" size={16} /> : (
+                          <>
+                            <span className="text-[10px] font-black uppercase tracking-widest">Run AI Analysis</span>
+                            <Zap size={16} />
+                          </>
+                        )}
                       </button>
-                    )}
-                  </div>
-                  <div className="relative flex-1 min-h-[140px]">
-                    <textarea 
-                      value={manualText}
-                      onChange={(e) => setManualText(e.target.value)}
-                      onKeyDown={handleKeyDown}
-                      disabled={isAnalyzing}
-                      placeholder="Input technical data: e.g. 'Main breaker tripping, 240V present, insulation smell near panel...'"
-                      className="w-full h-full bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-2xl p-4 text-xs font-bold text-slate-700 dark:text-slate-200 outline-none focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 transition-all resize-none leading-relaxed"
-                    />
-                  </div>
-                  <button 
-                    onClick={handleManualSubmit}
-                    disabled={isAnalyzing || !manualText.trim()}
-                    className={`w-full py-4 rounded-xl transition-all shadow-xl flex items-center justify-center gap-2 ${
-                      manualText.trim() && !isAnalyzing 
-                        ? 'bg-indigo-600 text-white shadow-indigo-500/30 active:scale-95' 
-                        : 'bg-slate-200 dark:bg-slate-800 text-slate-400 cursor-not-allowed'
-                    }`}
-                  >
-                    {isAnalyzing ? <Loader2 className="animate-spin" size={16} /> : (
-                      <>
-                        <span className="text-[10px] font-black uppercase tracking-widest">Run AI Analysis</span>
-                        <Zap size={16} />
-                      </>
-                    )}
-                  </button>
-                </div>
+                    </div>
+                  </>
+                )}
               </div>
               
               {isAnalyzing && (
-                <div className="p-4 bg-indigo-600 text-white rounded-2xl flex items-center justify-center gap-3 animate-pulse shadow-xl">
+                <div className={`p-4 rounded-2xl flex items-center justify-center gap-3 animate-pulse shadow-xl ${
+                  isHandsFree ? 'bg-yellow-400 text-black' : 'bg-indigo-600 text-white'
+                }`}>
                   <Loader2 className="animate-spin" size={18} />
-                  <span className="text-[10px] font-black uppercase tracking-widest">Consulting NEC Database...</span>
+                  <span className="text-[10px] font-black uppercase tracking-widest">
+                    {isHandsFree ? 'SPARKYSOLVE: RUNNING DIAGNOSTIC...' : 'Consulting NEC Database...'}
+                  </span>
                 </div>
               )}
             </div>
@@ -484,6 +528,33 @@ const ActiveJobPage: React.FC<ActiveJobPageProps> = ({ job, onUpdateJob, onToggl
                           </div>
                         </div>
                       </div>
+
+                      {note.analysis.parts && note.analysis.parts.length > 0 && (
+                        <div className="bg-white dark:bg-slate-900 rounded-[2.5rem] border-t-8 border-t-yellow-400 border border-slate-200 dark:border-slate-800 shadow-md animate-in fade-in slide-in-from-bottom-2 duration-300 delay-200">
+                          <div className="p-6">
+                            <div className="flex items-center gap-3 mb-5">
+                              <div className="w-8 h-8 rounded-lg bg-yellow-100 dark:bg-yellow-900/50 flex items-center justify-center text-yellow-600 dark:text-yellow-400">
+                                <Package size={18} />
+                              </div>
+                              <h5 className="font-black text-[11px] text-yellow-700 dark:text-yellow-300 uppercase tracking-widest">Required Materials</h5>
+                            </div>
+                            <div className="grid grid-cols-1 gap-2">
+                              {note.analysis.parts.map((p, i) => (
+                                <div key={i} className="flex justify-between items-center bg-slate-50 dark:bg-slate-950 p-4 rounded-2xl border border-slate-100 dark:border-slate-800">
+                                  <span className="text-xs font-bold text-slate-700 dark:text-slate-200">{p.name}</span>
+                                  <span className="text-[10px] font-black bg-yellow-400 text-black px-2 py-1 rounded-lg">QTY: {p.quantity}</span>
+                                </div>
+                              ))}
+                            </div>
+                            {note.analysis.estimatedCost && (
+                              <div className="mt-6 pt-6 border-t border-slate-100 dark:border-slate-800 flex justify-between items-center">
+                                <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Est. Material Cost</span>
+                                <span className="text-lg font-black text-emerald-600 dark:text-emerald-400">{note.analysis.estimatedCost}</span>
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                      )}
                     </div>
                   )}
                   <div className="flex justify-center mt-12 mb-4">

@@ -34,6 +34,8 @@ export interface AIAnalysis {
   summary: string;
   causes: string[];
   steps: string[];
+  parts?: { name: string; quantity: string }[];
+  estimatedCost?: string;
 }
 
 export interface VoiceNote {
